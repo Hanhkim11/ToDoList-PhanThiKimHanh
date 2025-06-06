@@ -67,12 +67,12 @@ const Form = () => {
               onClick={() => {
                 handleThemList(item);
               }}
-              className="btn btn-primary"
+              className="btn btn-primary me-2"
             >
               Thêm
             </button>
-            <button className="btn btn-danger">Xoá</button>
-            <button className="btn btn-success">Hoàn thành</button>
+            <button className="btn btn-danger me-2">Xoá</button>
+            <button className="btn btn-success me-2">Hoàn thành</button>
             <button className="btn btn-warning">Từ chối</button>
           </div>
         </div>
@@ -100,7 +100,7 @@ const Form = () => {
                     <li className="list-group-item">{item.taskName}</li>
                     <div>
                       <button
-                        className="btn btn-success"
+                        className="btn btn-success me-2"
                         onClick={() => {
                           handleHoanThanh(item);
                         }}
@@ -108,7 +108,7 @@ const Form = () => {
                         Hoàn thành
                       </button>
                       <button
-                        className="btn btn-danger"
+                        className="btn btn-danger me-2"
                         onClick={() => {
                           handleTuChoi(item);
                         }}
@@ -132,7 +132,7 @@ const Form = () => {
                       onClick={() => {
                         handleXoa(item);
                       }}
-                      className="btn btn-danger"
+                      className="btn btn-danger me-2"
                     >
                       Xoá
                     </button>
@@ -152,7 +152,7 @@ const Form = () => {
                       onClick={() => {
                         handleXoa(item);
                       }}
-                      className="btn btn-danger"
+                      className="btn btn-danger me-2"
                     >
                       Xoá
                     </button>
