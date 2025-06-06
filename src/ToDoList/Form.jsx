@@ -7,33 +7,77 @@ const Form = () => {
   const [listHoanThanh, setListHoanThanh] = useState([]);
   const [listTuChoi, setListTuChoi] = useState([]);
 
-  // ─────────── API ───────────
+  // Gọi hàm Api
   const fetchDataToDoList = async () => {
-    try {
-      const { data } = await Axios.get(
-        "https://svcy.myclass.vn/api/ToDoList/GetAllTask"
-      );
-      setDataListToDoList(data);
-    } catch (err) {
-      console.error("Lấy danh sách task thất bại:", err);
-    }
+    const result = await Axios.get(
+      "https://svcy.myclass.vn/api/ToDoList/GetAllTask"
+    );
+    setDataListToDoList(result.data);
   };
 
   // handlers
-  const handleThemList = (task) => setListThem((p) => [...p, task]);
+  const handleThemList = (task) => {
+    setListThem([...listThem, task]);
+  };
+
   const handleHoanThanh = (task) => {
-    setListHoanThanh((p) => [...p, task]);
-    setListThem((p) => p.filter((i) => i.taskName !== task.taskName));
+    debugger;
+    setListHoanThanh([...listHoanThanh, task]);
+    setListThem(
+      listThem.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
   };
   const handleTuChoi = (task) => {
-    setListTuChoi((p) => [...p, task]);
-    setListThem((p) => p.filter((i) => i.taskName !== task.taskName));
+    setListTuChoi([...listTuChoi, task]);
+    setListThem(
+      listThem.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
   };
+
   const handleXoa = (task) => {
-    const filter = (p) => p.filter((i) => i.taskName !== task.taskName);
-    setListThem(filter);
-    setListHoanThanh(filter);
-    setListTuChoi(filter);
+    setListThem(
+      listThem.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+    setListHoanThanh(
+      listHoanThanh.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+    setListTuChoi(
+      listTuChoi.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+  };
+
+  const renderListToDoList = () => {
+    // 7 item
+    return dataToDoList?.map((item, index) => {
+      return (
+        <div className="d-flex border justify-content-between mb-2" key={index}>
+          <li className="list-group-item">{item.taskName}</li>
+          <div>
+            <button
+              onClick={() => {
+                handleThemList(item);
+              }}
+              className="btn btn-primary"
+            >
+              Thêm
+            </button>
+            <button className="btn btn-danger">Xoá</button>
+            <button className="btn btn-success">Hoàn thành</button>
+            <button className="btn btn-warning">Từ chối</button>
+          </div>
+        </div>
+      );
+    });
   };
 
   useEffect(() => {
@@ -41,93 +85,84 @@ const Form = () => {
   }, []);
 
   //render
-  const renderItems = (list, extraButtons) =>
-    list.map((item) => (
-      <li
-        key={item.taskName}
-        className="list-group-item d-flex justify-content-between align-items-center my-1"
-      >
-        {item.taskName}
-        {extraButtons(item)}
-      </li>
-    ));
-
   return (
     <div className="container">
-      <h1 className="mt-5 mb-3">To Do List</h1>
-
-      {/* Danh sách lấy từ API */}
-      <ul className="list-group mb-4">
-        {renderItems(dataToDoList, (item) => (
-          <div>
-            <button
-              onClick={() => handleThemList(item)}
-              className="btn btn-primary me-2"
-            >
-              Thêm
-            </button>
-            <button
-              onClick={() => handleXoa(item)}
-              className="btn btn-danger me-2"
-            >
-              Xoá
-            </button>
-            <button
-              onClick={() => handleHoanThanh(item)}
-              className="btn btn-success me-2"
-            >
-              Hoàn thành
-            </button>
-            <button
-              onClick={() => handleTuChoi(item)}
-              className="btn btn-warning"
-            >
-              Từ chối
-            </button>
+      <h1>To do list</h1>
+      <ul className="list-group">{renderListToDoList()}</ul>
+      <div className="container">
+        <div>
+          <div className="col">
+            <h2>Add list</h2>
+            <ul className="list-group">
+              {listThem.map((item, index) => {
+                return (
+                  <div className="d-flex justify-content-between" key={index}>
+                    <li className="list-group-item">{item.taskName}</li>
+                    <div>
+                      <button
+                        className="btn btn-success"
+                        onClick={() => {
+                          handleHoanThanh(item);
+                        }}
+                      >
+                        Hoàn thành
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => {
+                          handleTuChoi(item);
+                        }}
+                      >
+                        Từ chối
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </ul>
           </div>
-        ))}
-      </ul>
-
-      {/* List Add */}
-      <h2>List Add</h2>
-      <ul className="list-group mb-4">
-        {renderItems(listThem, (item) => (
-          <div>
-            <button
-              onClick={() => handleHoanThanh(item)}
-              className="btn btn-success me-2"
-            >
-              Hoàn thành
-            </button>
-            <button
-              onClick={() => handleTuChoi(item)}
-              className="btn btn-danger"
-            >
-              Từ chối
-            </button>
+          <div className="col">
+            <h2>Finished list</h2>
+            <ul className="list-group">
+              {listHoanThanh.map((item, index) => {
+                return (
+                  <div className="d-flex justify-content-between" key={index}>
+                    <li className="list-group-item">{item.taskName}</li>
+                    <button
+                      onClick={() => {
+                        handleXoa(item);
+                      }}
+                      className="btn btn-danger"
+                    >
+                      Xoá
+                    </button>
+                  </div>
+                );
+              })}
+            </ul>
           </div>
-        ))}
-      </ul>
-
-      {/* List Finish */}
-      <h2>List Finish</h2>
-      <ul className="list-group mb-4">
-        {renderItems(listHoanThanh, (item) => (
-          <button onClick={() => handleXoa(item)} className="btn btn-danger">
-            Xoá
-          </button>
-        ))}
-      </ul>
-
-      {/* List Reject */}
-      <h2>List Reject</h2>
-      <ul className="list-group">
-        {renderItems(listTuChoi, (item) => (
-          <button onClick={() => handleXoa(item)} className="btn btn-danger">
-            Xoá
-          </button>
-        ))}
-      </ul>
+          <div className="col">
+            <h2>Reject list</h2>
+            <ul className="list-group">
+              {listTuChoi.map((item, index) => {
+                return (
+                  <div className="d-flex justify-content-between" key={index}>
+                    <li className="list-group-item">{item.taskName}</li>
+                    <button
+                      onClick={() => {
+                        handleXoa(item);
+                      }}
+                      className="btn btn-danger"
+                    >
+                      Xoá
+                    </button>
+                  </div>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
