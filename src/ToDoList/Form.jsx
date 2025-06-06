@@ -1,158 +1,167 @@
 import React, { useState, useEffect } from "react";
-
-const LOCAL_STORAGE_KEY = "todoList";
+import Axios from "axios";
 
 const Form = () => {
-  const [todos, setTodos] = useState([]);
-  const [input, setInput] = useState("");
+  const [dataToDoList, setDataListToDoList] = useState();
 
-  // Load from localStorage
+  const [listThem, setListThem] = useState([]);
+
+  const [listHoanThanh, setListHoanThanh] = useState([]);
+  const [listTuChoi, setListTuChoi] = useState([]);
+
+  // hàm gọi api
+  const fetchDataToDoList = async () => {
+    const result = await Axios.get(
+      "https://svcy.myclass.vn/api/ToDoList/GetAllTask"
+    );
+    setDataListToDoList(result.data);
+  };
+
+  const handleThemList = (task) => {
+    setListThem([...listThem, task]);
+  };
+
+  const handleHoanThanh = (task) => {
+    setListHoanThanh([...listHoanThanh, task]);
+    setListThem(
+      listThem.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+  };
+  // hàm xử lí từ chối
+  const handleTuChoi = (task) => {
+    setListTuChoi([...listTuChoi, task]);
+    setListThem(
+      listThem.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+  };
+
+  const handleXoa = (task) => {
+    setListThem(
+      listThem.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+    setListHoanThanh(
+      listHoanThanh.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+    setListTuChoi(
+      listTuChoi.filter((item) => {
+        return item.taskName !== task.taskName;
+      })
+    );
+  };
+
+  const renderListToDoList = () => {
+    // 7 item
+    return dataToDoList?.map((item, index) => {
+      return (
+        <div className="d-flex border justify-content-between mb-2" key={index}>
+          <li className="list-group-item">{item.taskName}</li>
+          <div className="">
+            <button
+              onClick={() => {
+                handleThemList(item);
+              }}
+              className="btn btn-primary me-2"
+            >
+              Thêm
+            </button>
+            <button className="btn btn-danger me-2">Xoá</button>
+            <button className="btn btn-success me-2">Hoàn thành</button>
+            <button className="btn btn-warning">Từ chối</button>
+          </div>
+        </div>
+      );
+    });
+  };
+
   useEffect(() => {
-    const savedTodos = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
-    if (savedTodos) {
-      setTodos(savedTodos);
-    }
+    fetchDataToDoList();
   }, []);
 
-  // Save to localStorage every time todos change
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(todos));
-  }, [todos]);
-
-  const handleAdd = () => {
-    if (input.trim() === "") return;
-
-    const newTodo = {
-      id: Date.now(),
-      text: input,
-      status: "active",
-    };
-
-    setTodos([newTodo, ...todos]);
-    setInput("");
-  };
-
-  const handleDelete = (id) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  };
-
-  const handleComplete = (id) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, status: "completed" } : todo
-      )
-    );
-  };
-
-  const handleReject = (id) => {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, status: "rejected" } : todo
-      )
-    );
-  };
-
-  const renderButtons = (todo) => {
-    switch (todo.status) {
-      case "active":
-        return (
-          <>
-            <button
-              className="btn btn-success btn-sm me-2"
-              onClick={() => handleComplete(todo.id)}
-            >
-              Complete
-            </button>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDelete(todo.id)}
-            >
-              Delete
-            </button>
-          </>
-        );
-      case "completed":
-        return (
-          <>
-            <button
-              className="btn btn-warning btn-sm me-2"
-              onClick={() => handleReject(todo.id)}
-            >
-              Reject
-            </button>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDelete(todo.id)}
-            >
-              Delete
-            </button>
-          </>
-        );
-      case "rejected":
-        return (
-          <>
-            <button
-              className="btn btn-success btn-sm me-2"
-              onClick={() => handleComplete(todo.id)}
-            >
-              Complete
-            </button>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDelete(todo.id)}
-            >
-              Delete
-            </button>
-          </>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className="container bg-navbar mt-5 py-3">
-      <h1>ToDoList</h1>
-
-      <div className="input-group my-4 gap-2">
-        <input
-          type="text"
-          className="form-control rounded-end"
-          placeholder="Enter new todo"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-        />
-        <button className="btn btn-primary rounded" onClick={handleAdd}>
-          Add
-        </button>
-      </div>
-
-      <div className="container">
-        {todos.map((todo) => (
-          <div
-            key={todo.id}
-            className={`input-group d-flex justify-content-end align-items-center rounded mb-2 ${
-              todo.status === "completed"
-                ? "bg-info"
-                : todo.status === "rejected"
-                ? "bg-secondary"
-                : "bg-white"
-            }`}
-          >
-            <input
-              type="text"
-              className={`form-control ${
-                todo.status !== "active"
-                  ? "text-decoration-line-through bg-light"
-                  : ""
-              }`}
-              value={todo.text}
-              disabled
-            />
-            <div className="input-button me-2">{renderButtons(todo)}</div>
+    <div className="container">
+      <h1 className="mt-5 mb-3">To Do List</h1>
+      <ul className="list-group">{renderListToDoList()}</ul>
+      <div class="container">
+        <div class="col">
+          <div>
+            <h2 className="mt-3">List Add</h2>
+            <ul className="list-group">
+              {listThem.map((item, index) => {
+                return (
+                  <div className="d-flex justify-content-between" key={index}>
+                    <li className="list-group-item my-1">{item.taskName}</li>
+                    <div>
+                      <button
+                        className="btn btn-success me-2"
+                        onClick={() => {
+                          handleHoanThanh(item);
+                        }}
+                      >
+                        Hoàn thành
+                      </button>
+                      <button
+                        className="btn btn-danger me-2"
+                        onClick={() => {
+                          handleTuChoi(item);
+                        }}
+                      >
+                        Từ chối
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </ul>
           </div>
-        ))}
+          <div className="col">
+            <h2>List Finish </h2>
+            <ul className="list-group">
+              {listHoanThanh.map((item, index) => {
+                return (
+                  <div className="d-flex justify-content-between" key={index}>
+                    <li className="list-group-item my-1">{item.taskName}</li>
+                    <button
+                      onClick={() => {
+                        handleXoa(item);
+                      }}
+                      className="btn btn-danger me-2"
+                    >
+                      Xoá
+                    </button>
+                  </div>
+                );
+              })}
+            </ul>
+          </div>
+          <div class="col">
+            <h2>List Reject </h2>
+            <ul className="list-group">
+              {listTuChoi.map((item, index) => {
+                return (
+                  <div className="d-flex justify-content-between" key={index}>
+                    <li className="list-group-item my-1">{item.taskName}</li>
+                    <button
+                      onClick={() => {
+                        handleXoa(item);
+                      }}
+                      className="btn btn-danger me-2"
+                    >
+                      Xoá
+                    </button>
+                  </div>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );
